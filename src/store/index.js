@@ -16,6 +16,7 @@ export default new Vuex.Store({
   modules: {
     alert,
     auth,
-    posts: crud('posts')
+    posts: crud('posts'),
+    users: crud('users')
   }
 })

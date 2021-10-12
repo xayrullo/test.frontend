@@ -26,14 +26,21 @@ const routes = [
     component: () => import('../views/Photos.vue')
   },
   {
-    path: '/todos',
-    name: 'Todos',
-    component: () => import('../views/Todos.vue')
-  },
-  {
     path: '/users',
     name: 'Users',
-    component: () => import('../views/Users.vue')
+    component: () => import('../views/Users.vue'),
+    children: [
+      {
+        path: '',
+        name: 'users-list',
+        component: () => import('../views/Users/index.vue')
+      },
+      {
+        path: ':childId',
+        name: 'user-detail',
+        component: () => import('../views/Users/_index.vue')
+      }
+    ]
   }
 ]
 
