@@ -35,7 +35,7 @@
                     <td><div>{{ user.company.name }}</div></td>
                     <td>{{ user.website }}</td>
                     <td class="text-center">
-                      <button class="btn btn-sm btn-success pull-right" @click="toDetailUser(user)" type="submit"><i class="text-lg bx bx-show"></i> Edit</button>
+                      <button class="btn btn-sm btn-success pull-right" @click="toDetailUser(user)" type="submit"><i class="text-lg bx bx-show"></i></button>
                     </td>
                   </tr>
                 </tbody>

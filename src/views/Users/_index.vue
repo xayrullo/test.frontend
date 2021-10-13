@@ -187,7 +187,9 @@
                         <tr>
                           <th style="width: 50px">№</th>
                           <th>Title</th>
-                          <th>Action</th>
+                          <th>
+                            <button class="btn btn-sm btn-info pull-right text-light" @click="toNew()"><i class="text-lg bx bx-plus-medical"></i></button>
+                          </th>
                         </tr>
                       </thead>
                       <tbody>
@@ -196,7 +198,12 @@
                           <td>
                             <div class="text-dark">{{ post.title }}</div>
                           </td>
-                          <td class="text-center"><a><i class="text-lg bx bx-user"></i></a></td>
+                          <td class="text-center">
+                            <div role="group" class="btn-group">
+                              <button class="btn btn-sm btn-success pull-right" @click="toEdit(post)" type="submit"><i class="text-lg bx bx-edit"></i></button>
+                              <button class="btn btn-sm btn-danger pull-right" @click="toDelete(post)" type="submit"><i class="text-lg bx bx-trash"></i></button>
+                            </div>
+                          </td>
                         </tr>
                       </tbody>
                     </table>
@@ -283,8 +290,12 @@
 import { mapGetters } from 'vuex'
 import { actions, getters } from '../../utils/store_schema'
 import $ from 'jquery'
+import postModal from '@/modal/post'
+import deleteModal from '@/modal/delete'
 const _page = 'users'
+const _pageInPost = 'posts'
 const { getById } = actions(_page)
+const { remove } = actions(_pageInPost)
 export default {
   data () {
     return {
@@ -315,6 +326,50 @@ export default {
     ...mapGetters(getters(_page))
   },
   methods: {
+    toEdit (post) {
+      this.showPostModal(post, 'edit')
+    },
+    toNew () {
+      this.showPostModal({ userId: this.$route.query.id, title: '', body: '' }, 'new')
+    },
+    toDelete (post) {
+      this.$modal.show(
+        deleteModal,
+        { status: 'sign-in' },
+        { height: 'auto', width: '500' }
+      )
+      this.$root.$once('delete-modal', res => {
+        var index = this.posts.indexOf(post)
+        if (res.status === 'deleted') {
+          this.$store.dispatch(remove, post.id).then(res => {
+            this.posts.splice(index, 1)
+          })
+        }
+      })
+    },
+    showPostModal (post, status) {
+      this.$modal.show(
+        postModal,
+        { post: post, status: status },
+        {
+          height: 'auto',
+          maxWidth: 600,
+          width: window.innerWidth <= 600 ? window.innerWidth - 30 : 600,
+          scrollable: true,
+          clickToClose: false
+        }
+      )
+      this.$root.$once('post-modal', res => {
+        var index = this.posts.indexOf(e => e.id === res.data.id)
+        if (res.status === 'edited') {
+          this.posts.splice(index, 1, res.data)
+        } else if (res.status === 'new') {
+          this.posts.push(res.data)
+        } else {
+          this.fetchUserPosts('refresh')
+        }
+      })
+    },
     isActive (menuItem) {
       return this.activeItem === menuItem
     },
@@ -326,18 +381,20 @@ export default {
         this.user = res
       })
     },
-    async fetchUserPosts () {
+    async fetchUserPosts (status) {
       await this.$store.dispatch(getById, `${this.$route.query.id}/posts`).then((res) => {
         this.posts = res
-        setTimeout(() => {
-          $('#postdatatable').DataTable({
-            lengthMenu: [
-              [5, 10, 25, 50, -1],
-              [5, 10, 25, 50, 'All']
-            ],
-            pageLength: 5
+        if (status !== 'refresh') {
+          setTimeout(() => {
+            $('#postdatatable').DataTable({
+              lengthMenu: [
+                [10, 25, 50, -1],
+                [10, 25, 50, 'All']
+              ],
+              pageLength: 10
+            })
           })
-        })
+        }
       })
     },
     async fetchUserTodos () {
@@ -346,10 +403,10 @@ export default {
         setTimeout(() => {
           $('#todosdatatable').DataTable({
             lengthMenu: [
-              [5, 10, 25, 50, -1],
-              [5, 10, 25, 50, 'All']
+              [10, 25, 50, -1],
+              [10, 25, 50, 'All']
             ],
-            pageLength: 5
+            pageLength: 10
           })
         })
       })
@@ -360,10 +417,10 @@ export default {
         setTimeout(() => {
           $('#albumsdatatable').DataTable({
             lengthMenu: [
-              [5, 10, 25, 50, -1],
-              [5, 10, 25, 50, 'All']
+              [10, 25, 50, -1],
+              [10, 25, 50, 'All']
             ],
-            pageLength: 5
+            pageLength: 10
           })
         })
       })
