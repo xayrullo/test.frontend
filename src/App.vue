@@ -23,12 +23,12 @@
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
           <ul class="navbar-nav ms-auto">
             <li class="nav-item">
-              <a class="nav-link" role="button" :class="$route.path === '/' ? 'active' : ''" aria-current="page" @click="$router.push('/')">Posts</a>
-            </li>
-            <li class="nav-item">
               <a class="nav-link" role="button"  :class="$route.path === '/users' ? 'active' : ''" @click="$router.push('/users')">Users</a>
             </li>
-            <li class="nav-item">
+            <!-- <li class="nav-item">
+              <a class="nav-link" role="button" :class="$route.path === '/posts' ? 'active' : ''" aria-current="page" @click="$router.push('/')">Posts</a>
+            </li> -->
+            <!-- <li class="nav-item">
               <a class="nav-link" role="button" :class="$route.path === '/comment' ? 'active' : ''" @click="$router.push('/comments')">Comments</a>
             </li>
             <li class="nav-item">
@@ -39,7 +39,7 @@
             </li>
             <li class="nav-item">
               <a class="nav-link" role="button" :class="$route.path === '/todos' ? 'active' : ''" @click="$router.push('/todos')">Todos</a>
-            </li>
+            </li> -->
           </ul>
         </div>
       </div>
@@ -47,7 +47,13 @@
     <router-view />
   </div>
 </template>
-
+<script>
+export default {
+  mounted () {
+    this.$router.push('/users')
+  }
+}
+</script>
 <style>
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
