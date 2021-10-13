@@ -4,9 +4,9 @@
       <!-- Breadcrumb -->
       <nav aria-label="breadcrumb" class="main-breadcrumb">
         <ol class="breadcrumb">
-          <li class="breadcrumb-item"><a href="index.html">posts</a></li>
-          <li class="breadcrumb-item"><a href="javascript:void(0)">User</a></li>
-          <li class="breadcrumb-item active" aria-current="page">User todos</li>
+          <li class="breadcrumb-item"><a @click="$router.push('/users')" class="text-info">Users</a></li>
+          <!-- <li class="breadcrumb-item"><a href="javascript:void(0)">User</a></li> -->
+          <li class="breadcrumb-item active" aria-current="page">User Profile</li>
         </ol>
       </nav>
       <!-- /Breadcrumb -->
@@ -177,7 +177,7 @@
                 >
                   <div class="table-responsive">
                     <table
-                      id="datatable"
+                      id="postdatatable"
                       style="width: 100%"
                       class="table table-striped table-bordered"
                       cellspacing="0"
@@ -185,8 +185,9 @@
                     >
                       <thead>
                         <tr>
-                          <th style="width: 60px">№</th>
+                          <th style="width: 50px">№</th>
                           <th>Title</th>
+                          <th>Action</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -195,7 +196,7 @@
                           <td>
                             <div class="text-dark">{{ post.title }}</div>
                           </td>
-                          <!-- <td><a @click="toDetailUser(user)">View</a></td> -->
+                          <td class="text-center"><a><i class="text-lg bx bx-user"></i></a></td>
                         </tr>
                       </tbody>
                     </table>
@@ -208,7 +209,35 @@
                   role="tabpanel"
                   aria-labelledby="nav-todos-tab"
                 >
-                  todos
+                  <div class="table-responsive">
+                    <table
+                      id="todosdatatable"
+                      style="width: 100%"
+                      class="table table-striped table-bordered"
+                      cellspacing="0"
+                      width="100%"
+                    >
+                      <thead>
+                        <tr>
+                          <th style="width: 50px">№</th>
+                          <th>Title</th>
+                          <th>Status</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr v-for="(todo, index) in todos" :key="index">
+                          <td>{{ index + 1 }}</td>
+                          <td>
+                            <div class="text-dark">{{ todo.title }}</div>
+                          </td>
+                          <td>
+                            <div v-if="todo.completed" class="text-success">Completed</div>
+                            <div v-else class="text-danger">Doing</div>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
                 <div
                   class="tab-pane fade mt-2"
@@ -217,7 +246,30 @@
                   role="tabpanel"
                   aria-labelledby="nav-albums-tab"
                 >
-                  albums
+                  <div class="table-responsive">
+                    <table
+                      id="albumsdatatable"
+                      style="width: 100%"
+                      class="table table-striped table-bordered"
+                      cellspacing="0"
+                      width="100%"
+                    >
+                      <thead>
+                        <tr>
+                          <th style="width: 60px !important">№</th>
+                          <th>Title</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr v-for="(album, index) in albums" :key="index">
+                          <td>{{ index + 1 }}</td>
+                          <td>
+                            <div class="text-dark">{{ album.title }}</div>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               </div>
             </div>
@@ -230,7 +282,7 @@
 <script>
 import { mapGetters } from 'vuex'
 import { actions, getters } from '../../utils/store_schema'
-// import $ from 'jquery'
+import $ from 'jquery'
 const _page = 'users'
 const { getById } = actions(_page)
 export default {
@@ -247,11 +299,17 @@ export default {
         }
       },
       activeItem: 'posts',
-      posts: []
+      posts: [],
+      todos: [],
+      albums: []
     }
   },
   mounted () {
-    this.fetchUser()
+    this.fetchUser().then(async () => {
+      await this.fetchUserPosts()
+      await this.fetchUserTodos()
+      await this.fetchUserAlbums()
+    })
   },
   computed: {
     ...mapGetters(getters(_page))
@@ -263,9 +321,51 @@ export default {
     setActive (menuItem) {
       this.activeItem = menuItem
     },
-    fetchUser () {
-      this.$store.dispatch(getById, this.$route.query.id).then((res) => {
+    async fetchUser () {
+      await this.$store.dispatch(getById, this.$route.query.id).then((res) => {
         this.user = res
+      })
+    },
+    async fetchUserPosts () {
+      await this.$store.dispatch(getById, `${this.$route.query.id}/posts`).then((res) => {
+        this.posts = res
+        setTimeout(() => {
+          $('#postdatatable').DataTable({
+            lengthMenu: [
+              [5, 10, 25, 50, -1],
+              [5, 10, 25, 50, 'All']
+            ],
+            pageLength: 5
+          })
+        })
+      })
+    },
+    async fetchUserTodos () {
+      await this.$store.dispatch(getById, `${this.$route.query.id}/todos`).then((res) => {
+        this.todos = res
+        setTimeout(() => {
+          $('#todosdatatable').DataTable({
+            lengthMenu: [
+              [5, 10, 25, 50, -1],
+              [5, 10, 25, 50, 'All']
+            ],
+            pageLength: 5
+          })
+        })
+      })
+    },
+    async fetchUserAlbums () {
+      await this.$store.dispatch(getById, `${this.$route.query.id}/albums`).then((res) => {
+        this.albums = res
+        setTimeout(() => {
+          $('#albumsdatatable').DataTable({
+            lengthMenu: [
+              [5, 10, 25, 50, -1],
+              [5, 10, 25, 50, 'All']
+            ],
+            pageLength: 5
+          })
+        })
       })
     }
   }
